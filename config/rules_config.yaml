@@ -1,0 +1,31 @@
+version: "0.1-provisional"
+updated_at: "2026-11-21"
+rules:
+  documents:
+    required: [escrituras, predial, alineamiento_numero_oficial, uso_suelo]
+  predial:
+    enabled: true
+    min_year: 2020
+    source: "Criterio informado por representante de Tiendas 3B"
+    official: false
+    requires_committee_confirmation: true
+  property_types: [store, cedis]
+  land_use:
+    store:
+      allowed_categories: []      # completar con hoja oficial
+      keywords_hint: ["comercial","comercio","tienda"]   # solo ayuda de búsqueda, no regla jurídica
+      restrictions: []
+    cedis:
+      allowed_categories: []
+      keywords_hint: ["industrial","bodega","almacenamiento","logística","distribución"]
+      restrictions: []
+  tolerances:
+    surface_difference: null      # null => diferencia = "requiere revisión"
+  validation:
+    require_evidence: true
+    unknown_data_status: pending
+    missing_data_status: requires_review
+  recommendation:
+    # decisiones de ejemplo, ajustar con criterios oficiales
+    no_cumple_if: ["required_rule_failed_high_severity"]
+    requires_review_if: ["pending_items","unverified_evidence","document_unreadable","inconsistency_unresolved"]
