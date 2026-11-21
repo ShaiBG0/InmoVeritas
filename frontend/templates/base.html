@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}InmoVeritas{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    {% block brand %}<a class="brand" href="/panel">Inmo<span>Veritas</span></a>{% endblock %}
+    <span class="tagline">Revisión inicial de expedientes inmobiliarios · Tiendas 3B</span>
+  </header>
+  <main class="container">{% block content %}{% endblock %}</main>
+  <footer class="footer">InmoVeritas · Prototipo. Apoya la revisión del equipo legal; no sustituye su decisión.</footer>
+</body>
+</html>

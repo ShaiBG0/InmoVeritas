@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Enviar documentos · InmoVeritas{% endblock %}
+{% block brand %}<span class="brand">Inmo<span>Veritas</span></span>{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Envía los documentos del inmueble</h1>
+  <p class="muted">Referencia: <strong>{{ link_label }}</strong></p>
+
+  {% if error %}<div class="alert err"><strong>No se pudo enviar.</strong> {{ error }}</div>{% endif %}
+  {% if ref %}<div class="alert warn">Estás agregando documentos al expediente <code>{{ ref }}</code>.</div>{% endif %}
+
+  <ol class="steps">
+    <li>Elige el tipo de proyecto.</li>
+    <li>Adjunta tus archivos (puedes elegir varios a la vez).</li>
+    <li>Pulsa «Enviar documentos».</li>
+  </ol>
+
+  <form id="f" method="post" action="/recibir/{{ token }}" enctype="multipart/form-data">
+    <input type="hidden" name="ref" value="{{ ref }}">
+
+    {% if not ref %}
+    <h2>1. ¿Para qué es el inmueble?</h2>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="project_type" value="store" required {% if project_type == 'store' %}checked{% endif %}>
+        <span><strong>Tienda comercial</strong><small>Local para abrir una tienda</small></span></label>
+      <label class="choice"><input type="radio" name="project_type" value="cedis" required {% if project_type == 'cedis' %}checked{% endif %}>
+        <span><strong>Centro de Distribución (CEDIS)</strong><small>Bodega, almacenamiento o logística</small></span></label>
+    </div>
+
+    <h2>2. Tus datos (opcional)</h2>
+    <label for="applicant">Nombre de la persona o empresa</label>
+    <input type="text" id="applicant" name="applicant" maxlength="120" placeholder="Ej. Inmobiliaria Ejemplo S.A.">
+    {% endif %}
+
+    <h2>{% if ref %}1{% else %}3{% endif %}. Adjunta los documentos</h2>
+    <p>Necesitamos: <strong>Escrituras</strong>, <strong>Predial</strong>, <strong>Alineamiento y Número Oficial</strong> y <strong>Uso de Suelo</strong>.</p>
+    <p class="muted">Acepta PDF, fotos o escaneos (JPG, PNG, WEBP, TIFF, HEIC) y ZIP. Máximo {{ MAX_FILE_MB }} MB por archivo. Si tomas fotos con el celular, procura buena luz y que el texto se lea con nitidez.</p>
+
+    <label class="dropzone" for="files"><strong>Toca aquí para elegir archivos</strong><span>o arrástralos hasta este recuadro</span></label>
+    <input id="files" type="file" name="files" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.tif,.tiff,.heic,.heif,.zip,image/*">
+    <ul id="list" class="filelist"></ul>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" id="send">Enviar documentos</button>
+      <button type="reset" class="btn">Cancelar y limpiar</button>
+    </div>
+    <p id="busy" class="muted" hidden>Enviando y revisando tus archivos… no cierres esta página.</p>
+  </form>
+</section>
+
+<script>
+const input=document.getElementById('files'), list=document.getElementById('list'),
+      form=document.getElementById('f'), send=document.getElementById('send'),
+      busy=document.getElementById('busy'), dz=document.querySelector('.dropzone');
+function fmt(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
+function render(){list.innerHTML='';for(const f of input.files){const li=document.createElement('li');li.textContent=f.name+' · '+fmt(f.size);list.appendChild(li)}}
+input.addEventListener('change',render);
+['dragover','dragenter'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',ev=>{input.files=ev.dataTransfer.files;render()});
+form.addEventListener('reset',()=>setTimeout(render,0));
+form.addEventListener('submit',()=>{send.disabled=true;send.textContent='Enviando…';busy.hidden=false});
+window.addEventListener('pageshow',()=>{send.disabled=false;send.textContent='Enviar documentos';busy.hidden=true});
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ meta.case_id }} · InmoVeritas{% endblock %}
+{% block content %}
+<p><a href="/panel">← Volver al panel</a></p>
+<h1>Expediente <code>{{ meta.case_id }}</code></h1>
+
+<section class="card">
+  <p><strong>Interesado:</strong> {{ meta.applicant }}</p>
+  <p><strong>Proyecto:</strong> {{ PROJECT_LABELS.get(meta.project_type, meta.project_type) }}</p>
+  <p><strong>Referencia del enlace:</strong> {{ meta.link_label }}</p>
+  <p><strong>Recibido:</strong> {{ meta.received_at[:16].replace('T',' ') }}</p>
+  <p>
+    <span class="badge ok">{{ s.valid }} válidos</span>
+    <span class="badge err">{{ s.invalid }} rechazados</span>
+    <span class="badge warn">{{ s.duplicates }} repetidos</span>
+  </p>
+</section>
+
+<section class="card">
+  <h2 style="margin-top:0">Archivos recibidos</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Archivo</th><th>Tipo</th><th>Tamaño</th><th>Estado técnico</th><th>Detalle</th></tr></thead>
+    <tbody>
+    {% for f in meta.files %}
+      {% set st = FILE_STATUS[f.status] %}
+      <tr>
+        <td>{{ f.name }}{% if f.origin %}<br><small class="muted">dentro de {{ f.origin }}</small>{% endif %}</td>
+        <td>{{ (f.kind or '—')|upper }}</td>
+        <td>{{ f.size|filesize }}</td>
+        <td><span class="badge {{ st[1] }}">{{ st[0] }}</span></td>
+        <td>{% if f.reason %}{{ f.reason }}{% else %}<span class="muted">Sin observaciones técnicas</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody></table></div>
+  <p class="muted">«Aceptado» significa que el archivo es técnicamente legible. No indica que el documento cumpla legalmente.</p>
+</section>
+
+<section class="card">
+  <h2 style="margin-top:0">Análisis</h2>
+  <div class="alert warn"><strong>Pendiente.</strong> Los agentes de clasificación, extracción, validación y recomendación aún no están conectados. Aquí aparecerán documentos faltantes, inconsistencias, evidencias y la recomendación inicial.</div>
+</section>
+
+<section class="card">
+  <h2 style="margin-top:0">Verificación del cifrado de este expediente</h2>
+  <ul class="secbar" style="grid-template-columns:1fr">
+    {% for label, ok in checks %}
+    <li><span class="badge {{ 'ok' if ok else 'err' }}">{{ 'Correcto' if ok else 'Falla' }}</span><span>{{ label }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

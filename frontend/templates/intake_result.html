@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Resultado del envío · InmoVeritas{% endblock %}
+{% block brand %}<span class="brand">Inmo<span>Veritas</span></span>{% endblock %}
+{% block content %}
+<section class="card narrow">
+  {% if case_id %}
+    <div class="alert ok"><strong>Recibimos tus documentos.</strong> Guarda esta referencia: <code>{{ case_id }}</code></div>
+  {% else %}
+    <div class="alert err"><strong>No pudimos recibir ningún archivo.</strong> Revisa los motivos y vuelve a enviarlos.</div>
+  {% endif %}
+
+  <p>
+    <span class="badge ok">Aceptados: {{ n_ok }}</span>
+    <span class="badge err">Rechazados: {{ n_bad }}</span>
+    <span class="badge warn">Repetidos: {{ n_dup }}</span>
+  </p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Archivo</th><th>Estado</th><th>Detalle</th></tr></thead>
+      <tbody>
+      {% for r in results %}
+        {% set s = FILE_STATUS[r.status] %}
+        <tr>
+          <td>{{ r.name }}{% if r.origin %}<br><small class="muted">dentro de {{ r.origin }}</small>{% endif %}</td>
+          <td><span class="badge {{ s[1] }}">{{ s[0] }}</span></td>
+          <td>{% if r.reason %}{{ r.reason }}<br><strong>Qué hacer:</strong> {{ r.fix }}{% else %}<span class="muted">Recibido correctamente.</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    {% if case_id and n_bad > 0 %}
+      <a class="btn primary" href="/recibir/{{ token }}?ref={{ case_id }}">Corregir y reenviar los rechazados</a>
+    {% elif case_id %}
+      <a class="btn" href="/recibir/{{ token }}">Enviar otro expediente</a>
+    {% else %}
+      <a class="btn primary" href="/recibir/{{ token }}">Corregir y volver a enviar</a>
+    {% endif %}
+  </div>
+  <p class="muted">Solo revisamos que los archivos se puedan abrir y leer. La revisión del contenido la realiza el equipo legal.</p>
+</section>
+{% endblock %}
